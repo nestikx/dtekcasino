@@ -2,7 +2,6 @@ import flet as ft
 import random, os
 import ns
 
-
 grid_width, grid_height = 24, 12
 cell_size = 40
 
@@ -18,9 +17,11 @@ def main(page: ft.Page):
     page.theme = ft.Theme(font_family = "e-Ukraine")
     page.theme_mode = ft.ThemeMode.DARK
 
-    page.vertical_alignment = ft.MainAxisAlignment.CENTER
-    page.horizontal_alignment = ft.CrossAxisAlignment.CENTER
-
+    def drag(e: ft.DragUpdateEvent):
+       e.control.top = max(0, e.control.top + e.delta_y)
+       e.control.left = max(0, e.control.left + e.delta_x)
+       e.control.update()
+    
     line1_cells = []
     line2_cells = []
     line3_cells = []
@@ -136,53 +137,66 @@ def main(page: ft.Page):
         alignment = ft.MainAxisAlignment.SPACE_AROUND
     )
 
-    page.add(
-        ft.Container(
-            content = ft.Column(
+    grafik = ft.Column(
+        controls = [
+            ft.Row(
                 controls = [
-                    ft.Row(
-                        controls = [
-                            ft.Container(
-                                content = ft.Text(
-                                    value = "Черга/підчерга",
-                                    color = ft.Colors.BLACK,
-                                    text_align = ft.TextAlign.CENTER
-                                ),
-                                width = cell_size*2+1,
-                                height = cell_size*3+2,
-                                bgcolor = on,
-                                alignment = ft.alignment.center
-                            ),
-                            line_times,
-                            ft.Container(
-                                content = ft.Text(
-                                    value = "Фактична тривалість відключень за добуб год",
-                                    color = ft.Colors.BLACK,
-                                    text_align = ft.TextAlign.CENTER
-                                ),
-                                width = cell_size*3+2,
-                                height = cell_size*3+2,
-                                bgcolor = on,
-                                alignment = ft.alignment.center
-                            )
-                        ],
-                        spacing = 1,
-                        alignment = ft.MainAxisAlignment.START
+                    ft.Container(
+                        content = ft.Text(
+                            value = "Черга/підчерга",
+                            color = ft.Colors.BLACK,
+                            text_align = ft.TextAlign.CENTER
+                        ),
+                        width = cell_size*2+1,
+                        height = cell_size*3+2,
+                        bgcolor = on,
+                        alignment = ft.alignment.center
                     ),
-                    ft.Row(
-                        controls = [
-                            line_1,
-                            line_2,
-                            grid,
-                            line_3
-                        ],
-                        spacing = 1,
-                        alignment = ft.MainAxisAlignment.START
+                    line_times,
+                    ft.Container(
+                        content = ft.Text(
+                            value = "Фактична тривалість відключень за добуб год",
+                            color = ft.Colors.BLACK,
+                            text_align = ft.TextAlign.CENTER
+                        ),
+                        width = cell_size*3+2,
+                        height = cell_size*3+2,
+                        bgcolor = on,
+                        alignment = ft.alignment.center
                     )
                 ],
                 spacing = 1,
                 alignment = ft.MainAxisAlignment.START
+            ),
+            ft.Row(
+                controls = [
+                    line_1,
+                    line_2,
+                    grid,
+                    line_3
+                ],
+                spacing = 1,
+                alignment = ft.MainAxisAlignment.START
             )
+        ],
+        spacing = 1,
+        alignment = ft.MainAxisAlignment.START
+    )
+
+    card = ft.GestureDetector(
+       mouse_cursor = ft.MouseCursor.MOVE,
+       drag_interval = 5,
+       on_pan_update = drag,
+       left = 0,
+       top = 0,
+       content = grafik,
+   )
+
+    page.add(
+        ft.Stack(
+            controls = [card],
+            width = 8000,
+            height = 4000
         )
     )
 

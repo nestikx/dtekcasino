@@ -18,9 +18,9 @@ def main(page: ft.Page):
     page.theme_mode = ft.ThemeMode.DARK
 
     def drag(e: ft.DragUpdateEvent):
-       e.control.top = max(0, e.control.top + e.delta_y)
-       e.control.left = max(0, e.control.left + e.delta_x)
-       e.control.update()
+        e.control.left += e.delta_x
+        e.control.top += e.delta_y
+        e.control.update()
     
     line1_cells = []
     line2_cells = []
@@ -180,12 +180,13 @@ def main(page: ft.Page):
             )
         ],
         spacing = 1,
-        alignment = ft.MainAxisAlignment.START
+        alignment = ft.MainAxisAlignment.START,
+        scale = 0.2
     )
 
     card = ft.GestureDetector(
        mouse_cursor = ft.MouseCursor.MOVE,
-       drag_interval = 5,
+       drag_interval = 1,
        on_pan_update = drag,
        left = 0,
        top = 0,
@@ -193,11 +194,17 @@ def main(page: ft.Page):
    )
 
     page.add(
-        ft.Stack(
-            controls = [card],
-            width = 8000,
-            height = 4000
+        ft.InteractiveViewer(
+            min_scale = 0.1,
+            max_scale = 10,
+            boundary_margin = ft.margin.all(20),
+            content = ft.Stack(
+                controls = [card],
+                width = 8000,
+                height = 4000
+            )
         )
+        
     )
 
 if __name__ == "__main__":

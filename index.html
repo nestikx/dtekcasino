@@ -1,0 +1,249 @@
+<!DOCTYPE html>
+<html lang="uk">
+<head>
+<meta charset="UTF-8">
+<title>DTEK casino</title>
+<style>
+  body {
+    margin: 0;
+    background: #1e1e1e;
+    font-family: 'e-Ukraine', sans-serif;
+    user-select: none;
+    overflow: hidden;
+    touch-action: none; /* Важливо для pinch & drag */
+  }
+
+  #viewer {
+    width: 100vw;
+    height: 100vh;
+    overflow: hidden;
+    position: relative;
+    cursor: grab;
+  }
+
+  #grafik {
+    position: absolute;
+    top: 0;
+    left: 0;
+    transform-origin: 0 0;
+  }
+
+  .row {
+    display: flex;
+    gap: 1px;
+  }
+
+  .column {
+    display: flex;
+    flex-direction: column;
+    gap: 1px;
+  }
+
+  .cell {
+    width: 40px;
+    height: 40px;
+    background-color: #8fabdd;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: black;
+    font-size: 12px;
+    box-sizing: border-box;
+  }
+
+  .line1 .cell { height: 81px; }
+  .line2 .cell { height: 40px; }
+  .line3 .cell { width: 122px; height: 40px; }
+
+  .time-cell {
+    width: 40px;
+    height: 122px;
+    background-color: #ffffff;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+    font-size: 12px;
+    line-height: 1.2;
+    white-space: pre;
+    flex-shrink: 0;
+  }
+
+  .header-cell-left {
+    width: 81px;
+    height: 122px;
+    background-color: #ffffff;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+    font-weight: bold;
+    font-size: 12px;
+    box-sizing: border-box;
+  }
+
+  .header-cell-right {
+    width: 122px;
+    height: 122px;
+    background-color: #ffffff;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+    font-weight: bold;
+    font-size: 12px;
+    box-sizing: border-box;
+  }
+</style>
+</head>
+<body>
+<div id="viewer">
+  <div id="grafik">
+    <!-- Верхній рядок: заголовки -->
+    <div class="row">
+      <div class="header-cell-left">Черга/підчерга</div>
+      <div id="time-row" class="row"></div>
+      <div class="header-cell-right">Фактична тривалість відключень за добу год</div>
+    </div>
+
+    <!-- Нижній рядок: графік -->
+    <div class="row" style="margin-top: 1px;">
+      <div class="column line1" id="line1"></div>
+      <div class="column line2" id="line2"></div>
+      <div class="column grid" id="grid"></div>
+      <div class="column line3" id="line3"></div>
+    </div>
+  </div>
+</div>
+
+<script>
+const gridWidth = 24;
+const gridHeight = 12;
+const onColor = '#ffffff';
+const offColor = '#8fabdd';
+
+function createCell(text, width, height, color) {
+  const cell = document.createElement('div');
+  cell.className = 'cell';
+  cell.style.width = width + 'px';
+  cell.style.height = height + 'px';
+  cell.style.backgroundColor = color;
+  if (text !== undefined) cell.textContent = text;
+  return cell;
+}
+
+// Line1
+const line1 = document.getElementById('line1');
+for (let i = 0; i < 6; i++) {
+  line1.appendChild(createCell(i + 1, 40, 81, onColor));
+}
+
+// Line2
+const line2 = document.getElementById('line2');
+for (let i = 0; i < 6; i++) {
+  line2.appendChild(createCell(`${i+1}.1`, 40, 40, onColor));
+  line2.appendChild(createCell(`${i+1}.2`, 40, 40, onColor));
+}
+
+// Grid & Line3
+const grid = document.getElementById('grid');
+const line3 = document.getElementById('line3');
+
+for (let y = 0; y < gridHeight; y++) {
+  const row = document.createElement('div');
+  row.className = 'row';
+  let offCount = 0;
+
+  for (let x = 0; x < gridWidth; x++) {
+    const color = Math.random() > 0.5 ? onColor : offColor;
+    if (color === offColor) offCount++;
+    row.appendChild(createCell('', 40, 40, color));
+  }
+
+  grid.appendChild(row);
+  line3.appendChild(createCell(offCount, 122, 40, onColor));
+}
+
+// Time row with line breaks
+const timeRow = document.getElementById('time-row');
+for (let i = 0; i < gridWidth; i++) {
+  const start = i;
+  const end = (i + 1) % 24;
+  const text = `${String(start).padStart(2,'0')}:\n00\n-\n${String(end).padStart(2,'0')}:\n00`;
+  const div = document.createElement('div');
+  div.className = 'time-cell';
+  div.textContent = text;
+  timeRow.appendChild(div);
+}
+
+// Drag & zoom for mouse and touch
+let scale = 1, posX = 0, posY = 0;
+let startX = 0, startY = 0, dragging = false;
+let pinchStartDist = 0, pinchStartScale = 1;
+
+const grafik = document.getElementById('grafik');
+const viewer = document.getElementById('viewer');
+
+function updateTransform() {
+  grafik.style.transform = `translate(${posX}px, ${posY}px) scale(${scale})`;
+}
+
+// Mouse events
+viewer.addEventListener('mousedown', e => {
+  dragging = true;
+  startX = e.clientX - posX;
+  startY = e.clientY - posY;
+  viewer.style.cursor = 'grabbing';
+});
+document.addEventListener('mouseup', () => {
+  dragging = false;
+  viewer.style.cursor = 'grab';
+});
+document.addEventListener('mousemove', e => {
+  if (!dragging) return;
+  posX = e.clientX - startX;
+  posY = e.clientY - startY;
+  updateTransform();
+});
+viewer.addEventListener('wheel', e => {
+  e.preventDefault();
+  const delta = e.deltaY > 0 ? -0.1 : 0.1;
+  scale = Math.min(Math.max(0.1, scale + delta), 10);
+  updateTransform();
+});
+
+// Touch events for drag and pinch
+let lastTouch = null;
+viewer.addEventListener('touchstart', e => {
+  if (e.touches.length === 1) {
+    dragging = true;
+    startX = e.touches[0].clientX - posX;
+    startY = e.touches[0].clientY - posY;
+  } else if (e.touches.length === 2) {
+    dragging = false;
+    const dx = e.touches[0].clientX - e.touches[1].clientX;
+    const dy = e.touches[0].clientY - e.touches[1].clientY;
+    pinchStartDist = Math.hypot(dx, dy);
+    pinchStartScale = scale;
+  }
+});
+viewer.addEventListener('touchmove', e => {
+  e.preventDefault();
+  if (e.touches.length === 1 && dragging) {
+    posX = e.touches[0].clientX - startX;
+    posY = e.touches[0].clientY - startY;
+    updateTransform();
+  } else if (e.touches.length === 2) {
+    const dx = e.touches[0].clientX - e.touches[1].clientX;
+    const dy = e.touches[0].clientY - e.touches[1].clientY;
+    const dist = Math.hypot(dx, dy);
+    scale = Math.min(Math.max(0.1, pinchStartScale * (dist / pinchStartDist)), 10);
+    updateTransform();
+  }
+});
+viewer.addEventListener('touchend', e => {
+  if (e.touches.length === 0) dragging = false;
+});
+</script>
+</body>
+</html>

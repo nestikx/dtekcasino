@@ -35,8 +35,7 @@ def main(page: ft.Page):
                 height = cell_size*2+1,
                 content = ft.Text(value=i+1, color=ft.Colors.BLACK),
                 bgcolor = on,
-                alignment = ft.alignment.center,
-                expand = True
+                alignment = ft.alignment.center
             )
         )
 
@@ -47,8 +46,7 @@ def main(page: ft.Page):
                 height = cell_size,
                 bgcolor = on,
                 alignment = ft.alignment.center,
-                content = ft.Text(value=f"{i+1}.1", color=ft.Colors.BLACK),
-                expand = True
+                content = ft.Text(value=f"{i+1}.1", color=ft.Colors.BLACK)
             )
         )
         line2_cells.append(
@@ -57,8 +55,7 @@ def main(page: ft.Page):
                 height = cell_size,
                 bgcolor = on,
                 alignment = ft.alignment.center,
-                content = ft.Text(value=f"{i+1}.2", color=ft.Colors.BLACK),
-                expand = True
+                content = ft.Text(value=f"{i+1}.2", color=ft.Colors.BLACK)
             )
         )
 
@@ -82,8 +79,7 @@ def main(page: ft.Page):
                 height = cell_size,
                 bgcolor = on,
                 alignment = ft.alignment.center,
-                content = ft.Text(value=str(blue_cells), color=ft.Colors.BLACK),
-                expand = True
+                content = ft.Text(value=str(blue_cells), color=ft.Colors.BLACK)
             )
         )
     
@@ -102,8 +98,7 @@ def main(page: ft.Page):
                     value = time_text,
                     color = ft.Colors.BLACK,
                     text_align = ft.TextAlign.CENTER
-                ),
-                expand = True
+                )
             )
         )
 
@@ -186,10 +181,10 @@ def main(page: ft.Page):
 
     card = ft.GestureDetector(
        mouse_cursor = ft.MouseCursor.MOVE,
-       drag_interval = 1,
+       drag_interval = 50,
        on_pan_update = drag,
-       left = 0,
-       top = 0,
+       left = -480,
+       top = -240,
        content = grafik,
    )
 
@@ -197,11 +192,10 @@ def main(page: ft.Page):
         ft.InteractiveViewer(
             min_scale = 0.1,
             max_scale = 10,
-            boundary_margin = ft.margin.all(20),
             content = ft.Stack(
                 controls = [card],
-                width = 8000,
-                height = 4000
+                width = 4000,
+                height = 2000
             )
         )
         
